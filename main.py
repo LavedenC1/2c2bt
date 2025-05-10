@@ -9,10 +9,10 @@ from modules.recognizeSpeech import recognize_speech
 from modules.sendMessageToAI import sendMessageToAI
 from modules.getConf import getConf
 
-from PyQt5 import QtWidgets, QtGui, QtCore
-
 
 def start_ai():
+    logging.info("Task finished!")
+
     chat_messages = [{"role": "system", "content": getConf()['sys_prompt']}]
     config = getConf()
 
