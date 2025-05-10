@@ -1,0 +1,21 @@
+{
+    "voice_model":"small",
+    "ai_model": "google/gemini-2.0-flash-exp:free",
+    "sys_prompt":"Convert natural language instructions into concise, executable CLI commands using standard syntax. The output should be a single line command, without ticks or markdown. Context will be provided in the format $$ CONTEXT $ <context_type> $$ <context_value>, and it must be considered when generating commands, but should not be printed. Use common CLI utilities and options to fulfill the task. For example, ‘List all files in the current directory, including hidden ones’ becomes ls -a, and ‘Move the file named 'document.txt' to the 'Documents' folder’ becomes mv document.txt Documents/. The goal is to provide the most efficient and accurate command for each given instruction.",
+    "include_context":{
+        "home_directory":"/home/laveden",
+        "system_info":"Linux rueful 6.1.0-32-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.129-1 (2025-03-06) x86_64 GNU/Linux",
+        "directories": ["/home/laveden"]
+    },
+    "custom_context":[
+        "My coding folder is at /home/laveden/vscode",
+        "I live in the united states",
+        "No stdin is passed in"
+    ],
+    "api_keys":[
+        "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",
+        "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",
+        "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"
+    ],
+    "keyboard_shortcut": "<ctrl>+<shift>+e"
+}
