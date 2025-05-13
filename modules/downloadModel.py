@@ -12,11 +12,11 @@ def downloadModel(model_type):
             with open(save_path, 'wb') as file:
                 for chunk in response.iter_content(chunk_size=8192):
                     file.write(chunk)
-            print(f"File downloaded successfully to: {save_path}")
+            requests.post("http://127.0.0.1:54765/msg",data=f"File downloaded successfully to: {save_path}")
         except requests.exceptions.RequestException as e:
-            print(f"Error downloading file: {e}")
+            requests.post("http://127.0.0.1:54765/msg",data=f"Error downloading file: {e}")
         except IOError as e:
-             print(f"Error writing to file: {e}")
+             requests.post("http://127.0.0.1:54765/msg",data=f"Error writing to file: {e}")
 
     def unzip_file(zip_filepath, extract_to_path):
         with zipfile.ZipFile(zip_filepath, 'r') as zip_ref:
@@ -41,13 +41,13 @@ def downloadModel(model_type):
     if not os.path.exists(f"{homedir}/.vmodels"):
         os.makedirs(f"{homedir}/.vmodels")
     
-    print("Downloading...")
+    requests.post("http://127.0.0.1:54765/msg",data="Downloading...")
     download_file(model_url, f"{homedir}/.vmodels/{save_name}")
 
-    print("Unzipping")
+    requests.post("http://127.0.0.1:54765/msg",data="Unzipping")
     unzip_file(f"{homedir}/.vmodels/{save_name}", f"{homedir}/.vmodels/")
 
-    print("Cleaning up")
+    requests.post("http://127.0.0.1:54765/msg",data="Cleaning up")
     os.remove(f"{homedir}/.vmodels/{save_name}")
 
 if __name__ == "__main__":

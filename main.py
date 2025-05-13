@@ -3,16 +3,17 @@ import sys
 import subprocess
 import threading
 import logging
+import time
 
 from pynput import keyboard
 from modules.recognizeSpeech import recognize_speech
 from modules.sendMessageToAI import sendMessageToAI
 from modules.getConf import getConf
 
+import requests
 
 def start_ai():
-    logging.info("Task finished!")
-
+    requests.get("http://127.0.0.1:54765/open")
     chat_messages = [{"role": "system", "content": getConf()['sys_prompt']}]
     config = getConf()
 
@@ -46,28 +47,32 @@ def start_ai():
 
     api_keys = config['api_keys']
 
-    print("Please wait for voice recognition model is loaded. This may take a few seconds...")
+    requests.post("http://127.0.0.1:54765/msg",data="Please wait for voice recognition model is loaded. This may take a few seconds...")
 
     text = recognize_speech()
     if text is None:
-        print("No speech recognized.")
+        requests.post("http://127.0.0.1:54765/msg",data="No speech recognized.")
+        time.sleep(getConf().get('exit_delay'))
+        requests.get("http://127.0.0.1:54765/close")
         return
     if text == "":
-        print("No speech recognized.")
+        requests.post("http://127.0.0.1:54765/msg",data="No speech recognized.")
+        time.sleep(getConf().get('exit_delay'))
+        requests.get("http://127.0.0.1:54765/close")
         return
 
     text = text.strip()
     if text.lower() in ("exit", "quit", "stop"):
-        print("Exiting...")
+        requests.post("http://127.0.0.1:54765/msg",data="Exiting...")
         sys.exit(0)
 
-    print(f"You said: {text}")
+    requests.post("http://127.0.0.1:54765/msg",data=f"You said: {text}")
     chat_messages.append({"role": "user", "content": text})
 
     command = sendMessageToAI(chat_messages, api_keys, config['ai_model'], temperature=0.0)
-    print(f"Generated command:\n{command}")
+    requests.post("http://127.0.0.1:54765/msg",data=f"Generated command:\n{command}")
 
-    choice = input("Would you like to execute the command? [y/N]: ").strip().lower()
+    choice = requests.post("http://127.0.0.1:54765/msg",data="prompt_yn Would you like to execute the command?").text.strip().lower()
     if choice == 'y':
         try:
             result = subprocess.run(
@@ -76,17 +81,24 @@ def start_ai():
                 text=True
             )
             output = result.stdout if result.stdout else result.stderr
-            print("Command output:")
-            print(output)
+            requests.post("http://127.0.0.1:54765/msg",data="Command output:")
+            requests.post("http://127.0.0.1:54765/msg",data=output)
+            time.sleep(getConf().get('exit_delay'))
+            requests.get("http://127.0.0.1:54765/close")
         except Exception as e:
-            print(f"Error executing command: {e}")
+            requests.post("http://127.0.0.1:54765/msg",data=f"Error executing command: {e}")
+            time.sleep(getConf().get('exit_delay'))
+            requests.get("http://127.0.0.1:54765/close")
     else:
-        print("Command execution skipped.")
+        requests.post("http://127.0.0.1:54765/msg",data="Command execution skipped.")
+        time.sleep(getConf().get('exit_delay'))
+        requests.get("http://127.0.0.1:54765/close")
 
 if __name__ == '__main__':
     hotkey = getConf()['keyboard_shortcut']
     hotkey_actions = {
-        hotkey: lambda: threading.Thread(target=start_ai, daemon=True).start()
+        hotkey: lambda: threading.Thread(target=start_ai, daemon=True).start(),
+        "<esc>": lambda: listener.stop()
     }
 
     with keyboard.GlobalHotKeys(hotkey_actions) as listener:
