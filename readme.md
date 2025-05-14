@@ -39,7 +39,8 @@ Description=2c2bt GUI Server
 After=network.target
 
 [Service]
-ExecStart=/path/to/your/.venv/python3 /path/to/project/gui_server.py
+Environment="DISPLAY=:0"
+ExecStart=/path/to/your/.venv/bin/python3 /path/to/project/gui_server.py
 WorkingDirectory=/path/to/project
 Restart=always
 ; Find your user: `echo $USER`
@@ -49,6 +50,11 @@ User=user
 WantedBy=multi-user.target
 ```
 | Did you make sure your paths and username is right?
+- Now, allow display permissions
+```bash
+xhost +SI:localuser:<username>
+```
+- Make sure your username is right!
 - Then restart the systemd daemon
 ```bash
 sudo systemctl daemon-reload
