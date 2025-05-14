@@ -25,16 +25,16 @@ def downloadModel(model_type):
 
     homedir = os.path.expanduser("~")
 
-    if model_type == "giga":
+    if model_type == "vosk_giga":
         model_url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.42-gigaspeech.zip"
         save_name = "vosk-model-en-us-0.42-gigaspeech.zip"
-    elif model_type == "big":
+    elif model_type == "vosk_big":
         model_url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip"
         save_name = "vosk-model-en-us-0.22.zip"
-    elif model_type == "medium":
+    elif model_type == "vosk_medium":
         model_url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip"
         save_name = "vosk-model-en-us-0.22-lgraph.zip"
-    elif model_type == "small":
+    elif model_type == "vosk_small":
         model_url = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip"
         save_name = "vosk-model-small-en-us-0.15.zip"
     

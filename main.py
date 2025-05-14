@@ -50,6 +50,14 @@ def start_ai():
     requests.post("http://127.0.0.1:54765/msg",data="Please wait for voice recognition model is loaded. This may take a few seconds...")
 
     text = recognize_speech()
+    try:
+        if text[0] == False:
+            requests.post("http://127.0.0.1:54765/msg",data=text[1])
+            time.sleep(getConf().get('exit_delay'))
+            requests.get("http://127.0.0.1:54765/close")
+            return
+    except:
+        pass
     if text is None:
         requests.post("http://127.0.0.1:54765/msg",data="No speech recognized.")
         time.sleep(getConf().get('exit_delay'))
@@ -65,11 +73,21 @@ def start_ai():
     if text.lower() in ("exit", "quit", "stop"):
         requests.post("http://127.0.0.1:54765/msg",data="Exiting...")
         sys.exit(0)
+    
+    
 
     requests.post("http://127.0.0.1:54765/msg",data=f"You said: {text}")
     chat_messages.append({"role": "user", "content": text})
 
     command = sendMessageToAI(chat_messages, api_keys, config['ai_model'], temperature=0.0)
+    try:
+        if command[0] == False:
+            requests.post("http://127.0.0.1:54765/msg",data=command[1])
+            time.sleep(getConf().get('exit_delay'))
+            requests.get("http://127.0.0.1:54765/close")
+            return
+    except:
+        pass
     requests.post("http://127.0.0.1:54765/msg",data=f"Generated command:\n{command}")
 
     choice = requests.post("http://127.0.0.1:54765/msg",data="prompt_yn Would you like to execute the command?").text.strip().lower()
@@ -97,8 +115,8 @@ def start_ai():
 if __name__ == '__main__':
     hotkey = getConf()['keyboard_shortcut']
     hotkey_actions = {
-        hotkey: lambda: threading.Thread(target=start_ai, daemon=True).start(),
-        "<esc>": lambda: listener.stop()
+        hotkey: lambda: threading.Thread(target=start_ai, daemon=True).start()
+        # "<esc>": lambda: listener.stop()
     }
 
     with keyboard.GlobalHotKeys(hotkey_actions) as listener:

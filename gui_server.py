@@ -13,7 +13,6 @@ x = 0
 y = screen_height - window_height
 window.geometry(f'{window_width}x{window_height}+{x}+{y}')
 window.overrideredirect(True)
-window.withdraw()
 
 window.configure(bg="#3772FF")
 
@@ -22,10 +21,14 @@ custom_font = font.Font(family="Monospace", size=8, weight="normal")
 label = tk.Label(window, text="", anchor="nw", justify="left",
                  bg="#343E3D", fg="#6EEB83", font=custom_font,
                  padx=10, pady=10, relief="groove")
-label.pack(fill="both", expand=True, padx=10, pady=10)
 
+label.pack(fill="both", expand=True, padx=10, pady=10)
+window.after(0, lambda: label.config(text=""))
+window.update()
 button_frame = tk.Frame(window, bg="#3772FF")
 button_frame.pack(pady=5)
+
+window.withdraw()
 
 def command_response_yes():
     answer_var.set("y")
@@ -95,6 +98,7 @@ def closeWin():
 @app.route("/exit")
 def exitWin():
     exit(0)
+
 def runFlask():
     app.run(debug=True, use_reloader=False, port=54765)
 

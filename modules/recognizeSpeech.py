@@ -1,64 +1,69 @@
-import requests
-import logging
-import speech_recognition as sr
-import json
-from vosk import Model, KaldiRecognizer
-from modules.getConf import *
-from modules.downloadModel import downloadModel
-from vosk import SetLogLevel
 import os
+import json
+import requests
 import sounddevice as sd
-import sys
+import speech_recognition as sr
+from vosk import Model, KaldiRecognizer, SetLogLevel
+from modules.getConf import getConf
+from modules.downloadModel import downloadModel
 
 def recognize_speech():
-    
     SetLogLevel(-1)
 
     try:
         homedir = os.path.expanduser("~")
-
         model_type = getConf()['voice_model']
 
-        if model_type == "giga":
-            model_path = f"{homedir}/vmodels/vosk-model-en-us-0.42-gigaspeech"
-        elif model_type == "big":
-            model_path = f"{homedir}/.vmodels/vosk-model-en-us-0.22"
-        elif model_type == "medium":
-            model_path = f"{homedir}/.vmodels/vosk-model-en-us-0.22-lgraph"
-        elif model_type == "small":
-            model_path = f"{homedir}/.vmodels/vosk-model-small-en-us-0.15"
-        else:
-            requests.post("http://127.0.0.1:54765/msg",data=f"Pick a model from small, medium, big, or giga in config.json")
-            return "Invalid model type"
-        
-        if not os.path.exists(model_path):
-            requests.post("http://127.0.0.1:54765/msg",data=f"Model not found at {model_path}. Downloading...")
+        # Determine model path based on configuration
+        model_path = {
+            "vosk_giga": f"{homedir}/vmodels/vosk-model-en-us-0.42-gigaspeech",
+            "vosk_big": f"{homedir}/.vmodels/vosk-model-en-us-0.22",
+            "vosk_medium": f"{homedir}/.vmodels/vosk-model-en-us-0.22-lgraph",
+            "vosk_small": f"{homedir}/.vmodels/vosk-model-small-en-us-0.15",
+            "cmu_sphinx": homedir
+        }.get(model_type)
+
+        if not model_path:
+            requests.post("http://127.0.0.1:54765/msg", data="Invalid model type in config.json")
+            return False, "Invalid model type"
+
+        if model_type.startswith("vosk_") and not os.path.exists(model_path):
+            requests.post("http://127.0.0.1:54765/msg", data=f"Model not found at {model_path}. Downloading...")
             downloadModel(model_type)
-        
-        model = Model(model_path)
-        recognizer = KaldiRecognizer(model, int(sd.query_devices(sd.default.device[0], 'input')['default_samplerate']))
 
         r = sr.Recognizer()
-        with sr.Microphone(sample_rate=int(sd.query_devices(sd.default.device[0], 'input')['default_samplerate'])) as source:
-            requests.post("http://127.0.0.1:54765/msg",data=f"What would you like me to do?")
-            audio = r.listen(source)
-            audio_data = audio.get_raw_data()
+        sample_rate = int(sd.query_devices(sd.default.device[0], 'input')['default_samplerate'])
 
-        if recognizer.AcceptWaveform(audio_data):
-            result = recognizer.Result()
-            text = json.loads(result)['text']
-        else:
-            # requests.post("http://127.0.0.1:54765/msg",data=f"No final result, but partial results can be seen.")
-            partial_result = json.loads("".join(recognizer.PartialResult()))
-            # print(recognizer.PartialResult())
-            text = partial_result['partial']
+        if model_type.startswith("vosk_"):
+            model = Model(model_path)
+            recognizer = KaldiRecognizer(model, sample_rate)
 
-        return text
+            with sr.Microphone(sample_rate=sample_rate) as source:
+                requests.post("http://127.0.0.1:54765/msg", data="Listening...")
+                audio = r.listen(source)
+                audio_data = audio.get_raw_data()
+
+            if recognizer.AcceptWaveform(audio_data):
+                result = recognizer.Result()
+                text = json.loads(result)['text']
+            else:
+                partial_result = json.loads("".join(recognizer.PartialResult()))
+                text = partial_result['partial']
+
+            return text
+
+        elif model_type == "cmu_sphinx":
+            with sr.Microphone(sample_rate=sample_rate) as source:
+                requests.post("http://127.0.0.1:54765/msg", data="Listening...")
+                audio = r.listen(source)
+
+            try:
+                text = r.recognize_sphinx(audio)
+                return text
+            except sr.UnknownValueError:
+                return ""
 
     except sr.RequestError as e:
-        requests.post("http://127.0.0.1:54765/msg",data=f"Could not request results from Vosk service; {e}")
+        requests.post("http://127.0.0.1:54765/msg", data=f"Could not get results; {e}")
     except FileNotFoundError:
-        requests.post("http://127.0.0.1:54765/msg",data=f"Error: Vosk model not found at {model_path}. Please download and extract a model.")
-
-if __name__ == "__main__":
-    print(recognize_speech())
+        requests.post("http://127.0.0.1:54765/msg", data=f"Error: Model not found at {model_path}.")

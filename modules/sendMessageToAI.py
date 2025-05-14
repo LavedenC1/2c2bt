@@ -1,6 +1,8 @@
 from openai import OpenAI
 import requests
 from openai import OpenAI
+from modules.getConf import getConf
+from modules.addPwStdin import *
 
 def sendMessageToAI(chat_messages: list[dict], api_keys: list[str], model: str, temperature: float = 1.0) -> str:
     
@@ -18,7 +20,10 @@ def sendMessageToAI(chat_messages: list[dict], api_keys: list[str], model: str, 
             )
 
             response = completion.choices[0].message.content
-
+            print(completion)
+            if response == None:
+                print(completion)
+                return False, "No response from AI"
             # Remove code block markdown if present
             lines = response.splitlines()
             if lines and lines[0].startswith("```"):
@@ -34,18 +39,24 @@ def sendMessageToAI(chat_messages: list[dict], api_keys: list[str], model: str, 
                 response = response[1:]
             if response.endswith("`"):
                 response = response[:-1]
+            
+            if getConf().get("pwless_sudo_converter"):
+                response = addPwStdin(response, getConf().get("sudo_password"))
             return response
 
         except Exception as e:
             err_str = str(e)
-            if "429" in err_str:
-                print(e)
-                continue
-            else:
+            try:
+                if completion.error['code'] == 429:
+                    continue
+                else:
+                    requests.post("http://127.0.0.1:54765/msg", data=f"Unexpected error with key {key}: {e}")
+                    continue
+            except:
                 requests.post("http://127.0.0.1:54765/msg", data=f"Unexpected error with key {key}: {e}")
                 continue
     
-    return "Rate limited for all API Keys :("
+    return False,"Rate limited for all API Keys :("
 
 
 if __name__ == "__main__":
