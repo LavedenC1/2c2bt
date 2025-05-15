@@ -1,3 +1,4 @@
+
 # 2c2bt Voice Assistant
 A voice assistant designed to help with linux!
 ## Information
@@ -13,98 +14,157 @@ cd  2c2bt
 python3 -m venv .venv
 source .venv/bin/activate
 ```
+| You will need a virtual environment, the project will error out without it!
+
 3. Install all packages
 ```bash
 pip3 install -r requirements.txt
 ```
-### Without Systemd
+### Without XDG
 4. Run both scripts at the same time
 ```bash
-python3 main.py # One terminal
-python3 gui_server.py # Another terminal
+python3 2c_assistant.py # One terminal
+python3 2c_gui_server.py # Another terminal
 ```
 5. Configure the project in the **Config** section
-### With Systemd
+### With XDG
 4. Now here is the hard part.
-| Only works if your system uses systemd
+| Only works if your system uses XDG
 
-- Create a new systemd service:
+- Create a new desktop file:
 ```bash
-sudo nano /etc/systemd/system/2c2bt_gui.service
+nano ~/.config/autostart/2c2bt_gui.desktop
 ```
-- Paste this in, make sure your values are right
+- Paste this in, make sure your values are right:
 ```ini
-[Unit]
-Description=2c2bt GUI Server
-After=network.target
-
-[Service]
-Environment="DISPLAY=:0"
-ExecStart=/path/to/your/.venv/bin/python3 /path/to/project/gui_server.py
+[Desktop Entry]
+Type=Application
+Name=2c2bt GUI Server
+Exec=/path/to/project/.venv/bin/python3 /path/to/project/2c_gui_server.py
 WorkingDirectory=/path/to/project
-Restart=always
-; Find your user: `echo $USER`
-User=user
-
-[Install]
-WantedBy=multi-user.target
+Terminal=false
+X-GNOME-Autostart-enabled=true
 ```
-| Did you make sure your paths and username is right?
-- Now, allow display permissions
+| Did you make sure your paths is right?
+- Make it executable
 ```bash
-xhost +SI:localuser:<username>
+chmod +x ~/.config/autostart/2c2bt_gui.desktop
 ```
-- Make sure your username is right!
-- Then restart the systemd daemon
+- If anything goes wrong, restart the server by relogging in or like this:
 ```bash
-sudo systemctl daemon-reload
+kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
+gio launch ~/.config/autostart/2c2bt_gui.desktop >/dev/null 2>&1
 ```
-- Now enable it on boot (optional) and start it
-```bash
-sudo systemctl enable --now 2c2bt_gui.service # If you want to enable on boot
-sudo systemctl start 2c2bt_gui.service
-```
-- If anything goes wrong, restart the server like this:
-```bash
-sudo systemctl restart 2c2bt_gui.service
-```
+| Yes you can make a script to automate this
 - That's the server, now to make the assistant enabler.
-- Create a new systemd service, but for the user
+- Create a new desktop file, but for the assistant
 ```bash
-mkdir -p ~/.local/share/systemd/user
-nano ~/.local/share/systemd/user/2c2bt_assistant.service
+nano ~/.config/autostart/2c2bt_assistant.desktop
 ```
 - Paste this in, make sure the info is right too.
 ```ini
-[Unit]
-Description=2c2bt Assistant Service
-
-[Service]
-Type=oneshot
-ExecStart=/path/to/your/.venv/python3 /path/to/project/main.py
-WorkingDirectory=/path/to/project/
-RemainAfterExit=true
-StandardOutput=journal
-
-[Install]
-WantedBy=graphical-session.target
+[Desktop Entry]
+Type=Application
+Name=2c2bt Assistant
+Exec=/path/to/project/.venv/bin/python3 /path/to/project/2c_assistant.py
+WorkingDirectory=/path/to/project
+Terminal=false
+X-GNOME-Autostart-enabled=true
 ```
-- Restart the daemon again
+- Make it executable
 ```bash
-sudo systemctl daemon-reload
-```
-- Now enable it
-```bash
-sudo systemctl enable --user 2c2bt_assistant.service # If you want to enable after login
-sudo systemctl start 2c2bt_assistant.service
+chmod +x ~/.config/autostart/2c2bt_assistant.desktop
 ```
 - And restart it like this
 ```bash
-sudo systemctl restart --user 2c2bt_assistant.service
+kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
 ```
 - And that's the hard part.
 5. Configure the project in the **Config** section
 
+## Create a stop and start command
+Create a stop and start command to avoid typing long kill commands. Two methods, in your `.bashrc` or a custom command.
+### .bashrc
+Add this to your `.bashrc`:
+```bash
+function 2c2bt(){
+    if [ "$1" == "-s" ]; then
+        echo "Starting 2c2bt"
+        gio launch ~/.config/autostart/2c2bt_gui.desktop >/dev/null 2>&1
+        gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
+        echo "Done"
+    elif [ "$1" == "-k" ]; then
+        echo "Killing"
+        kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
+        kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+        echo "Done"
+    elif [ "$1" == "-r" ]; then
+        echo "Killing"
+        kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
+        kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+        echo "Starting 2c2bt"
+        gio launch ~/.config/autostart/2c2bt_gui.desktop >/dev/null 2>&1
+        gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
+        echo "Done"
+    else
+        echo -e "Usage: 2c2bt [option]\n -s    Start 2c2bt\n -k    Kill 2c2bt\n -r    Restart 2c2bt"
+    fi
+}
+
+_2c2bt_comp() {
+    local cur prev
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    local commands=""
+    local options="-k -s -r"
+    COMPREPLY=($(compgen -W "$commands $options" -- "$cur"))
+}
+
+complete -F _2c2bt_comp 2c2bt
+```
+The command is completed, now just reload the shell to take effect:
+```bash
+source ~/.bashrc
+```
+### Command
+1. Create a new file, name it `2c2bt`.
+```bash
+touch 2c2bt
+```
+3. Paste this in:
+```bash
+#!/bin/bash
+if [ "$1" == "-s" ]; then
+    echo "Starting 2c2bt"
+    gio launch ~/.config/autostart/2c2bt_gui.desktop >/dev/null 2>&1
+    gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
+    echo "Done"
+elif [ "$1" == "-k" ]; then
+    echo "Killing"
+    kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
+    kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+    echo "Done"
+elif [ "$1" == "-r" ]; then
+    echo "Killing"
+    kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
+    kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+    echo "Starting 2c2bt"
+    gio launch ~/.config/autostart/2c2bt_gui.desktop >/dev/null 2>&1
+    gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
+    echo "Done"
+else
+    echo -e "Usage: 2c2bt [option]\n -s    Start 2c2bt\n -k    Kill 2c2bt\n -r    Restart 2c2bt"
+fi
+```
+4. Allow execution permissions:
+```bash
+chmod +x 2c2bt
+```
+5. Move it to `/usr/local/bin`, or wherever your path says:
+```bash
+sudo mv 2c2bt /usr/local/bin
+```
 ## Config
 The config is in config.json at the project root. It is in JSON.
 ### Configuration Values:
@@ -172,11 +232,14 @@ The config is in config.json at the project root. It is in JSON.
 		- `<alt>+<shift>+a`
 		- `<esc>+a`
 ### After configuring:
-If you are using systemd, restart the service:
+If you are using systemd, restart the project!:
 ```bash
-sudo systemctl restart --user 2c2bt_assistant.service
+kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
+gio launch ~/.config/autostart/2c2bt_gui.desktop
+kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+gio launch ~/.config/autostart/2c2bt_assistant.desktop
 ```
-Otherwise, just rerun the `main.py` script.
+Otherwise, just rerun the `2c_assistant.py` script.
  
 ## Usage
 After all the configuration and setup, use the keyboard shortcut you setup to start the assistant. A small GUI will pop up at the bottom left of the screen, and start speaking when it says `Listening`.<br>

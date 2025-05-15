@@ -1,7 +1,7 @@
 {
-    "voice_model":"cmu_sphinx",
-    "sudo_password":"bashbuzz",
-    "pwless_sudo_converter": true,
+    "voice_model":"vosk_small",
+    "sudo_password":"...",
+    "pwless_sudo_converter": false,
     "ai_model": "deepseek/deepseek-prover-v2:free",
     "sys_prompt":"Convert natural language instructions into concise, executable CLI commands using standard syntax. The output should be a single line command, without ticks or markdown. Context will be provided in the format $$ CONTEXT $ <context_type> $$ <context_value>, and it must be considered when generating commands, but should not be printed. Use common CLI utilities and options to fulfill the task. For example, ‘List all files in the current directory, including hidden ones’ becomes ls -a, and ‘Move the file named 'document.txt' to the 'Documents' folder’ becomes mv document.txt Documents/. The goal is to provide the most efficient and accurate command for each given instruction.",
     "exit_delay": 3,
@@ -13,11 +13,12 @@
     "custom_context":[
         "My coding folder is at /home/laveden/vscode",
         "I live in the united states",
-        "No stdin is passed in"
+        "No stdin is passed in",
+        "I am not the root user"
     ],
     "api_keys":[
         "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",
         "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"
     ],
-    "keyboard_shortcut": "<ctrl>+<shift>+e"
+    "keyboard_shortcut": "<alt>+<shift>+e"
 }

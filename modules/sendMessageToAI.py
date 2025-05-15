@@ -49,6 +49,9 @@ def sendMessageToAI(chat_messages: list[dict], api_keys: list[str], model: str, 
             try:
                 if completion.error['code'] == 429:
                     continue
+                elif completion.error['code'] == 401:
+                    requests.post("http://127.0.0.1:54765/msg", data=f"Key {key} is invalid or expired")
+                    continue
                 else:
                     requests.post("http://127.0.0.1:54765/msg", data=f"Unexpected error with key {key}: {e}")
                     continue

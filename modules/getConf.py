@@ -1,7 +1,10 @@
 import json
+import sys
 
 def getConf():
-    with open("config.json","r") as f:
+    from pathlib import Path
+    path = Path(str(sys.executable)).parent.parent.parent
+    with open(f"{path}/config.json","r") as f:
         data = json.loads(f.read())
 
     return data
