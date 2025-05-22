@@ -257,7 +257,7 @@ The config is in config.json at the project root. It is in JSON.
 		-  `I'm new to Linux`
 		- `I live in the United States`
 		- ...
-	- It is recommended to add `No stdin is passed in`
+	- It is recommended to add `No stdin is passed in` and `I am not the root user, but I can use sudo` (if applies)
 9. `api_keys`
 	- Your Openrouter API key(s).
 	- ~~You can use multiple account to get more requests on free models and avoid being rate limited~~
@@ -275,12 +275,14 @@ The config is in config.json at the project root. It is in JSON.
 	- Pynput doesn't need root, but sometimes doesn't work.
 	- Keyboard needs root, but always works.
 ### After configuring:
-If you are using systemd, restart the project!:
+If you are using XDG, restart the project!:
 ```bash
-kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
-gio launch ~/.config/autostart/2c2bt_gui.desktop
 kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
 gio launch ~/.config/autostart/2c2bt_assistant.desktop
+```
+Or
+```bash
+2c2bt -r
 ```
 Otherwise, just rerun the `2c_assistant.py` script.
  
