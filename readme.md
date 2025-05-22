@@ -1,4 +1,3 @@
-
 # 2c2bt Voice Assistant
 A voice assistant designed to help with linux!
 ## Information
@@ -25,6 +24,7 @@ pip3 install -r requirements.txt
 ```bash
 python3 2c_assistant.py # One terminal
 python3 2c_gui_server.py # Another terminal
+python3 2c_gui_kb.py # If you are using keyboard 
 ```
 5. Configure the project in the **Config** section
 ### With XDG
@@ -80,6 +80,36 @@ chmod +x ~/.config/autostart/2c2bt_assistant.desktop
 kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
 gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
 ```
+
+- **Only do this part if you are using keyboard library (more in config section)**
+- Edit `kb_lib_wrapper.sh` in the project directory. Replace $SUDO_PW with your sudo password and make sure the path to the python executable in the virtual environment and the path to the `2c_kb_lib.py` is correct
+- Make it executable
+```bash
+chmod +x kb_lib_wrapper.sh
+```
+- Create a new desktop file, but for the keyboard library listener
+```bash
+nano ~/.config/autostart/2c2bt_kbl.desktop
+```
+- Paste this in, make sure the info is right too.
+```ini
+[Desktop Entry]
+Type=Application
+Name=2c2bt Keyboard Library Wrapper
+Exec=/path/to/project/kb_lib_wrapper.sh
+WorkingDirectory=/path/to/project
+Terminal=false
+X-GNOME-Autostart-enabled=true
+```
+- Make it executable
+```bash
+chmod +x ~/.config/autostart/2c2bt_kbl.desktop
+```
+- And restart it like this
+```bash
+sudo kill $(ps -aux | grep 2c_kb_lib.py | awk 'NR==1 {print($2)}')
+gio launch ~/.config/autostart/2c2bt_kbl.desktop >/dev/null 2>&1
+```
 - And that's the hard part.
 5. Configure the project in the **Config** section
 
@@ -93,19 +123,23 @@ function 2c2bt(){
         echo "Starting 2c2bt"
         gio launch ~/.config/autostart/2c2bt_gui.desktop >/dev/null 2>&1
         gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
+		# gio launch ~/.config/autostart/2c2bt_kbl.desktop >/dev/null 2>&1 # Uncomment if using keyboard library
         echo "Done"
     elif [ "$1" == "-k" ]; then
         echo "Killing"
         kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
         kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+		# echo $SUDO_PW | sudo -S kill $(ps -aux | grep 2c_kb_lib.py | awk 'NR==1 {print($2)}') # If using keyboard library. replace your sudo password
         echo "Done"
     elif [ "$1" == "-r" ]; then
         echo "Killing"
         kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
         kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+		# echo $SUDO_PW | sudo -S kill $(ps -aux | grep 2c_kb_lib.py | awk 'NR==1 {print($2)}') # If using keyboard library. replace your sudo password
         echo "Starting 2c2bt"
         gio launch ~/.config/autostart/2c2bt_gui.desktop >/dev/null 2>&1
         gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
+        # gio launch ~/.config/autostart/2c2bt_kbl.desktop >/dev/null 2>&1 # Uncomment if using keyboard library
         echo "Done"
     else
         echo -e "Usage: 2c2bt [option]\n -s    Start 2c2bt\n -k    Kill 2c2bt\n -r    Restart 2c2bt"
@@ -139,19 +173,23 @@ if [ "$1" == "-s" ]; then
     echo "Starting 2c2bt"
     gio launch ~/.config/autostart/2c2bt_gui.desktop >/dev/null 2>&1
     gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
+    # gio launch ~/.config/autostart/2c2bt_kbl.desktop >/dev/null 2>&1 # Uncomment if using keyboard library
     echo "Done"
 elif [ "$1" == "-k" ]; then
     echo "Killing"
     kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
     kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+    # echo $SUDO_PW | sudo -S kill $(ps -aux | grep 2c_kb_lib.py | awk 'NR==1 {print($2)}') # If using keyboard library. replace your sudo password
     echo "Done"
 elif [ "$1" == "-r" ]; then
     echo "Killing"
     kill $(ps -aux | grep 2c_gui_server.py | awk 'NR==1 {print($2)}')
     kill $(ps -aux | grep 2c_assistant.py | awk 'NR==1 {print($2)}')
+    # echo $SUDO_PW | sudo -S kill $(ps -aux | grep 2c_kb_lib.py | awk 'NR==1 {print($2)}') # If using keyboard library. replace your sudo password
     echo "Starting 2c2bt"
     gio launch ~/.config/autostart/2c2bt_gui.desktop >/dev/null 2>&1
     gio launch ~/.config/autostart/2c2bt_assistant.desktop >/dev/null 2>&1
+    # gio launch ~/.config/autostart/2c2bt_kbl.desktop >/dev/null 2>&1 # Uncomment if using keyboard library
     echo "Done"
 else
     echo -e "Usage: 2c2bt [option]\n -s    Start 2c2bt\n -k    Kill 2c2bt\n -r    Restart 2c2bt"
@@ -231,6 +269,11 @@ The config is in config.json at the project root. It is in JSON.
 		- `<ctrl>+<shift>+e`
 		- `<alt>+<shift>+a`
 		- `<esc>+a`
+11. `kb_lib`
+	- The keyboard library to detect keypresses.
+	- Can be `pynput` or `keyboard`
+	- Pynput doesn't need root, but sometimes doesn't work.
+	- Keyboard needs root, but always works.
 ### After configuring:
 If you are using systemd, restart the project!:
 ```bash

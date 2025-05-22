@@ -5,6 +5,7 @@ from tkinter import font
 
 window = tk.Tk()
 window.title("2c2bt")
+window.withdraw()
 screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
 window_width = 320
@@ -24,11 +25,9 @@ label = tk.Label(window, text="", anchor="nw", justify="left",
 
 label.pack(fill="both", expand=True, padx=10, pady=10)
 window.after(0, lambda: label.config(text=""))
-window.update()
 button_frame = tk.Frame(window, bg="#3772FF")
 button_frame.pack(pady=5)
 
-window.withdraw()
 
 def command_response_yes():
     answer_var.set("y")
