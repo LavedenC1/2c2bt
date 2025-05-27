@@ -1,7 +1,7 @@
 # 2c2bt Voice Assistant
 A voice assistant designed to help with linux!
 ## Information
-2c2bt runs on python, using OpenRouter to serve AI. It currently has a basic GUI (tbi) and is activated through a keyboard shortcut. It was made for Linux, but could be tweaked for Windows or Mac. Also this is a long readme.
+2c2bt runs on python, using OpenRouter/OpenAI to serve AI. It currently has a basic GUI (tbi) and is activated through a keyboard shortcut. It was made for Linux, but could be tweaked for Windows or Mac. Also this is a long readme.
 ## Setup
 1. Clone the repo and enter the directory
 ```bash
@@ -230,7 +230,8 @@ The config is in config.json at the project root. It is in JSON.
 		- `sudo apt update` -> `echo <password> | sudo -S apt update`
 	- Type: Boolean
 4. `ai_model`
-	- The AI model to use for the LLM, can be found [here](https://openrouter.ai/models?max_price=0).
+	- The AI model to use for the LLM, can be found [here](https://openrouter.ai/models) for OpenRouter.
+	- The AI model to use for the LLM, can be found [here](https://platform.openai.com/docs/models) for OpenAI.
 	- Example: `deepseek/deepseek-prover-v2:free`
 	- Type: String
 5. `sys_prompt`
@@ -259,9 +260,10 @@ The config is in config.json at the project root. It is in JSON.
 		- ...
 	- It is recommended to add `No stdin is passed in` and `I am not the root user, but I can use sudo` (if applies)
 9. `api_keys`
-	- Your Openrouter API key(s).
+	- Your Openrouter/OpenAI API key(s).
 	- ~~You can use multiple account to get more requests on free models and avoid being rate limited~~
-	- Get an API Key from [here](https://openrouter.ai/settings/keys)
+	- Get an API Key from [here](https://openrouter.ai/settings/keys) for OpenRouter.
+	- Get an API Key from [here](https://platform.openai.com/api-keys) for OpenAI.
 10. `keyboard_shortcut`
 	- The activation keyboard shortcut.
 	- In Pynput notation
@@ -274,6 +276,11 @@ The config is in config.json at the project root. It is in JSON.
 	- Can be `pynput` or `keyboard`
 	- Pynput doesn't need root, but sometimes doesn't work.
 	- Keyboard needs root, but always works.
+12. `ai_provider`
+	- The AI Provider.
+	- Can be `openai` or `openrouter`
+	- OpenRouter has more models and has free models.
+	- OpenAI is only paid but is smarter.
 ### After configuring:
 If you are using XDG, restart the project!:
 ```bash

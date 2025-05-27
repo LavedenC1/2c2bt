@@ -3,6 +3,7 @@
     "voice_model":"vosk_small",
     "sudo_password":"bashbuzz",
     "pwless_sudo_converter": true,
+    "ai_provider": "openrouter",
     "ai_model": "google/gemini-2.0-flash-exp:free",
     "sys_prompt":"Convert natural language instructions into concise, executable CLI commands using standard syntax. The output should be a single line command, without ticks or markdown. Context will be provided in the format $$ CONTEXT $ <context_type> $$ <context_value>, and it must be considered when generating commands, but should not be printed. Use common CLI utilities and options to fulfill the task. For example, ‘List all files in the current directory, including hidden ones’ becomes ls -a, and ‘Move the file named 'document.txt' to the 'Documents' folder’ becomes mv document.txt Documents/. The goal is to provide the most efficient and accurate command for each given instruction.",
     "exit_delay": 3,

@@ -4,12 +4,19 @@ from openai import OpenAI
 from modules.getConf import getConf
 from modules.addPwStdin import *
 
-def sendMessageToAI(chat_messages: list[dict], api_keys: list[str], model: str, temperature: float = 1.0) -> str:
+def sendMessageToAI(chat_messages: list[dict], api_keys: list[str], model: str, temperature: float = 1.0):
     
     for key in api_keys:
         try:
+            
+            if getConf()["ai_provider"] == "openrouter":
+                provurl = "https://openrouter.ai/api/v1"
+            elif getConf()["ai_provider"] == "openai":
+                provurl = "https://api.openai.com/v1/chat/completions"
+            else:
+                return False, "Invalid AI provider specified in configuration"
             client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
+                base_url=provurl,
                 api_key=key
             )
 
