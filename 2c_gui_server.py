@@ -50,7 +50,6 @@ window.bind("<Configure>", update_wrap_length)
 global text
 text = ""
 
-# Create a global tkinter variable to capture the answer
 answer_var = tk.StringVar()
 
 app = Flask(__name__)
@@ -63,7 +62,7 @@ def index():
 def receive_data():
     global text
     body = request.get_data(as_text=True)
-    args = body.split()  # note: use split() to actually get tokens
+    args = body.split()
     if len(args) > 0 and args[0] == "prompt_yn":
         answer_var.set("")
         window.deiconify()

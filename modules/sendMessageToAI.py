@@ -31,7 +31,6 @@ def sendMessageToAI(chat_messages: list[dict], api_keys: list[str], model: str, 
             if response == None:
                 print(completion)
                 return False, "No response from AI"
-            # Remove code block markdown if present
             lines = response.splitlines()
             if lines and lines[0].startswith("```"):
                 response = "\n".join(lines[1:])

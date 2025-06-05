@@ -1,3 +1,5 @@
+from pathlib import Path
+import sys
 import os
 import json
 import requests
@@ -14,7 +16,6 @@ def recognize_speech():
         homedir = os.path.expanduser("~")
         model_type = getConf()['voice_model']
 
-        # Determine model path based on configuration
         model_path = {
             "vosk_giga": f"{homedir}/vmodels/vosk-model-en-us-0.42-gigaspeech",
             "vosk_big": f"{homedir}/.vmodels/vosk-model-en-us-0.22",
@@ -62,7 +63,22 @@ def recognize_speech():
                 return text
             except sr.UnknownValueError:
                 return ""
-
+        elif model_type == "google_cloud":
+            path = Path(str(sys.executable)).parent.parent.parent
+            if not os.path.exists(f"{path}/{getConf['googlec_key_file']}.json"):
+                requests.post("http://127.0.0.1:54765/msg", data=f"Google Cloud key file not found at {path}/{getConf['googlec_key_file']}.json")
+                return False, "Google Cloud key file not found"
+            
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = f"{path}/{getConf['googlec_key_file']}.json"
+            
+            with sr.Microphone(sample_rate=sample_rate) as source:
+                requests.post("http://127.0.0.1:54765/msg", data="Listening...")
+                audio = r.listen(source)
+            try:
+                text = r.recognize_google_cloud(audio)
+                return text
+            except sr.UnknownValueError:
+                return False, "Google Cloud could not understand audio"
     except sr.RequestError as e:
         requests.post("http://127.0.0.1:54765/msg", data=f"Could not get results; {e}")
     except FileNotFoundError:
