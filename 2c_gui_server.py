@@ -14,7 +14,6 @@ x = 0
 y = screen_height - window_height
 window.geometry(f'{window_width}x{window_height}+{x}+{y}')
 window.overrideredirect(True)
-
 window.configure(bg="#3772FF")
 
 custom_font = font.Font(family="Monospace", size=8, weight="normal")
@@ -22,12 +21,12 @@ custom_font = font.Font(family="Monospace", size=8, weight="normal")
 label = tk.Label(window, text="", anchor="nw", justify="left",
                  bg="#343E3D", fg="#6EEB83", font=custom_font,
                  padx=10, pady=10, relief="groove")
-
 label.pack(fill="both", expand=True, padx=10, pady=10)
+label.config(wraplength=window_width - 20)
 window.after(0, lambda: label.config(text=""))
+
 button_frame = tk.Frame(window, bg="#3772FF")
 button_frame.pack(pady=5)
-
 
 def command_response_yes():
     answer_var.set("y")
@@ -37,7 +36,6 @@ def command_response_no():
 
 btn_yes = tk.Button(button_frame, text="Yes", command=command_response_yes)
 btn_no = tk.Button(button_frame, text="No", command=command_response_no)
-
 btn_yes.pack(side="left", padx=5)
 btn_no.pack(side="left", padx=5)
 
@@ -46,12 +44,8 @@ def update_wrap_length(event):
 
 window.bind("<Configure>", update_wrap_length)
 
-
-global text
 text = ""
-
 answer_var = tk.StringVar()
-
 app = Flask(__name__)
 
 @app.route("/")
@@ -66,13 +60,12 @@ def receive_data():
     if len(args) > 0 and args[0] == "prompt_yn":
         answer_var.set("")
         window.deiconify()
-        text = text + " ".join(body.split()[1:]) + "\n"
+        text += " ".join(args[1:]) + "\n"
         window.after(0, lambda: label.config(text=text))
         window.wait_variable(answer_var)
         answer = answer_var.get()
         return answer, 200
-
-    text = text + body + "\n"
+    text += body + "\n"
     window.after(0, lambda: label.config(text=text))
     return body, 200
 
@@ -99,7 +92,6 @@ def exitWin():
 
 def runFlask():
     app.run(debug=True, use_reloader=False, port=54765)
-
 
 if __name__ == '__main__':
     flask_thread = threading.Thread(target=runFlask)

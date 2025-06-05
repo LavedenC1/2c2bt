@@ -1,13 +1,11 @@
 {
-    "kb_lib": "keyboard",
     "voice_model":"google_cloud",
     "googlec_key_file":"c2bt-462000-b66fefd35c65.json",
+
     "sudo_password":"bashbuzz",
     "pwless_sudo_converter": true,
-    "ai_provider": "openrouter",
-    "ai_model": "nousresearch/deephermes-3-mistral-24b-preview:free",
-    "sys_prompt":"Convert natural language instructions into concise, executable CLI commands using standard syntax. The output should be a single line command, without ticks or markdown. Context will be provided in the format $$ CONTEXT $ <context_type> $$ <context_value>, and it must be considered when generating commands, but should not be printed. Use common CLI utilities and options to fulfill the task. For example, ‘List all files in the current directory, including hidden ones’ becomes ls -a, and ‘Move the file named 'document.txt' to the 'Documents' folder’ becomes mv document.txt Documents/. The goal is to provide the most efficient and accurate command for each given instruction.",
     "exit_delay": 3,
+
     "include_context":{
         "home_directory":"/home/laveden",
         "system_info":"Linux rueful 6.1.0-32-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.129-1 (2025-03-06) x86_64 GNU/Linux",
@@ -18,11 +16,17 @@
         "I live in the united states",
         "No stdin is passed in",
         "I am not the root user, but I can use sudo"
+    ],
 
-    ],
+    "ai_provider": "openai",
+    "ai_model": "o4-mini-2025-04-16",
+    "temperature": 1.0,
+    "sys_prompt":"Convert natural language instructions into concise, executable CLI commands using standard syntax. The output should be a single line command, without ticks or markdown. Context will be provided in the format $$ CONTEXT $ <context_type> $$ <context_value>, and it must be considered when generating commands, but should not be printed. Use common CLI utilities and options to fulfill the task. For example, ‘List all files in the current directory, including hidden ones’ becomes ls -a, and ‘Move the file named 'document.txt' to the 'Documents' folder’ becomes mv document.txt Documents/. The goal is to provide the most efficient and accurate command for each given instruction.",
     "api_keys":[
-        "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"
+        "***"
     ],
+
+    "kb_lib": "keyboard",
     "pynput_kbs": "<ctrl>+<alt>+a",
     "keyboard_kbs": "ctrl+alt+a"
 }

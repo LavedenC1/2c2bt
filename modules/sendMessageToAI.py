@@ -11,25 +11,27 @@ def sendMessageToAI(chat_messages: list[dict], api_keys: list[str], model: str, 
             
             if getConf()["ai_provider"] == "openrouter":
                 provurl = "https://openrouter.ai/api/v1"
+                client = OpenAI(
+                    base_url=provurl,
+                    api_key=key
+                )
             elif getConf()["ai_provider"] == "openai":
-                provurl = "https://api.openai.com/v1/chat/completions"
+                client = OpenAI(
+                    api_key=key
+                )
             else:
                 return False, "Invalid AI provider specified in configuration"
-            client = OpenAI(
-                base_url=provurl,
-                api_key=key
-            )
+            
+            
 
             completion = client.chat.completions.create(
                 model=model,
                 messages=chat_messages,
-                temperature=temperature
+                temperature=getConf()["temperature"],
             )
 
             response = completion.choices[0].message.content
-            print(completion)
             if response == None:
-                print(completion)
                 return False, "No response from AI"
             lines = response.splitlines()
             if lines and lines[0].startswith("```"):
