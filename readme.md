@@ -1,7 +1,22 @@
+
 # 2c2bt Voice Assistant
 A voice assistant designed to help with linux!
 ## Information
 2c2bt runs on python, using OpenRouter/OpenAI to serve AI. It currently has a basic GUI (tbi) and is activated through a keyboard shortcut. It was made for Linux, but could be tweaked for Windows or Mac. Also this is a long readme.
+## Features
+- Supports many models.
+- Automatic downloader for vosk.
+- A GUI
+- Command conformation.
+- Support for OpenRouter and OpenAI
+- Highly customizable
+- Google cloud intergration
+- Passwordless sudo command converter
+- Custom Context
+- Support for two keyboard libraries
+- Start/stop/restart command
+- Support for rootless/sudoless users
+- Autostart
 ## Setup
 1. Clone the repo and enter the directory
 ```bash
@@ -203,6 +218,22 @@ chmod +x 2c2bt
 ```bash
 sudo mv 2c2bt /usr/local/bin
 ```
+## Setting up Google Cloud
+This is for setting up Google Cloud for speech recognition
+1. Make a [Google Cloud Console](https://console.cloud.google.com/) account.
+2.  Create a new project, you can name it whatever you want.
+3. Look up **"Speech-to-Text API"**, click it, and enable it.
+| Not Text-to-Speech.
+4. Go to **IAM & Admin > Service Accounts**
+5. Create a service account, name it and describe it whatever you want.
+6. Enter the service account (click the three dots, then manage details)
+| You might already be entered.
+7. Click **permissions** from the top bar, then press manage access.
+8. Click **Add role**, and look for **Cloud Speech-to-Text Service Agent**, and click it, then click save.
+9. Now click **keys**, and create a new key. It should be JSON. 
+10. When done creating a key, download it/move it to the root directory of 2c2bt.
+11. Configure in `config.json` the right path. More in Config, Step 14
+
 ## Config
 The config is in config.json at the project root. It is in JSON.
 ### Configuration Values:
@@ -210,14 +241,14 @@ The config is in config.json at the project root. It is in JSON.
 	- The voice model to use.
 	- Use the model that fits your device in computing power
 	- The deeper the list, the more intensive, the more time to load the model.
-	- Offline models:
+	- Offline model.s:
 		- `cmu_sphinx` -> CMU Sphinx. Very light and inaccurate.
 		- `vosk_small` -> Vosk's small model (~40MB). Light, but more accurate
 		- `vosk_medium` -> Vosk's lgraph model (~128MB). Not as light, but more accurate.
 		- `vosk_big` -> Vosk's generic model (~1.8G). Heavy, but much more accurate
 		- `vosk_giga` -> Vosk's gigamodel ~(2.3G). Be pacient, very heavy, but also accurate.
 	- Online models:
-		- None
+		- `google_cloud`
 2. `sudo_password`
 	- Your sudo password.
 	- This isn't sent anywhere and is local on the device.
@@ -280,7 +311,19 @@ The config is in config.json at the project root. It is in JSON.
 	- The AI Provider.
 	- Can be `openai` or `openrouter`
 	- OpenRouter has more models and has free models.
-	- OpenAI is only paid but is smarter.
+	- OpenAI is only paid but is smarter. (But they offer free complimentary credits)
+13. `temperature`
+	- The creativity of the AI Model.
+	- If its closer to 0, then it will be more repetitive to the same prompts.
+	- Can be from 0.0 to 2.0
+	- 0.0 is generally recommended
+	- **Some models, such as o4-mini, may break at a temperature of anything but 1.0. Setting the temperature to 1.0 might fix some models.**
+14. `googlec_key_file`
+	- The file for your google cloud key file (more in **Setting up Google Cloud**)
+	- Relative path and not absolute
+	- Ex:
+		- Correct: `c2bt-******-************.json`
+		- Not correct: `/home/user/2c2bt/c2bt-******-************.json`
 ### After configuring:
 If you are using XDG, restart the project!:
 ```bash
