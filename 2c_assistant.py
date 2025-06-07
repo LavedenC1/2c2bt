@@ -110,15 +110,15 @@ def start_ai():
                 time.sleep(getConf().get('exit_delay'))
                 requests.get("http://127.0.0.1:54765/close")
             except Exception as e:
-                requests.post("http://127.0.0.1:54765/msg",data=f"Error executing command: {e}")
+                requests.post("http://127.0.0.1:54765/msg",data=f"Error running command: {e}")
                 time.sleep(getConf().get('exit_delay'))
                 requests.get("http://127.0.0.1:54765/close")
         else:
-            requests.post("http://127.0.0.1:54765/msg",data="Command execution skipped.")
+            requests.post("http://127.0.0.1:54765/msg",data="Aborting!")
             time.sleep(getConf().get('exit_delay'))
             requests.get("http://127.0.0.1:54765/close")
     except requests.exceptions.ConnectionError as e:
-        print("Server not running/reachable.")
+        print("Server not running!")
 
 if __name__ == '__main__':
     if getConf()['kb_lib'] == "pynput":
